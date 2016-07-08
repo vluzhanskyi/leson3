@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Lesson3_Serialization
 {
@@ -16,28 +13,27 @@ namespace Lesson3_Serialization
             ln = new LinkedListNode<Data>(null);
             PropertyInfo[] props = ini1.GetType().GetProperties();
 
-            foreach (PropertyInfo property in props)
+            foreach (var property in props)
             {
-                List<object> valuesList = new List<object>();
-                IniSectionAttribute Section = null;
-                IniKeyAttribute Key = null;
+                IniSectionAttribute section = null;
+                IniKeyAttribute key = null;
                 string[] attributes = new string[2];
                 object[] attrs = property.GetCustomAttributes(true);
 
                 foreach (var attr in attrs)
                 {
-                    if (Section == null)
+                    if (section == null)
                     {
-                        Section = attr as IniSectionAttribute;
-                        if (Section != null)
-                            attributes[0] = Section.Element;
+                        section = attr as IniSectionAttribute;
+                        if (section != null)
+                            attributes[0] = section.Element;
                     }
 
-                    if (Key == null)
+                    if (key == null)
                     {
-                        Key = attr as IniKeyAttribute;
-                        if (Key != null)
-                            attributes[1] = Key.Element;
+                        key = attr as IniKeyAttribute;
+                        if (key != null)
+                            attributes[1] = key.Element;
                     }
                 }
                 object value = property.GetValue(ini1);
@@ -54,16 +50,25 @@ namespace Lesson3_Serialization
             {
                 foreach (var variable in linkedData)
                 {
-                    if (ln.Next == null)
+                    if (ln != null && ln.Next == null)
+                    {
+                        wr.WriteLine();
                         wr.WriteLine("[{0}]", variable.Attributes[0]);
+                    }
+                        
                     else
                     {
-                        if (ln.Previous != null && ln.Value.Attributes[0] != ln.Previous.Value.Attributes[0])
+                        if (ln != null &&
+                            (ln.Previous != null && ln.Value.Attributes[0] != ln.Previous.Value.Attributes[0]))
+                        {
+                            wr.WriteLine();
                             wr.WriteLine("[{0}]", variable.Attributes[0]);
+                        }
+                            
+
                     }
-                    var v = variable.Attributes[0];
-                    wr.WriteLine(variable.Attributes[1] + " = " + variable.Value);
-                    ln = ln.Previous;
+                    wr.WriteLine("  {0} = {1}", variable.Attributes[1],  variable.Value);
+                    if (ln != null) ln = ln.Previous;
                 }
             }
         }
