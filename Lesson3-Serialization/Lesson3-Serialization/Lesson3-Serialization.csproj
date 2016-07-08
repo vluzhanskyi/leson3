@@ -41,8 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="iniKey.cs" />
-    <Compile Include="IniSection.cs" />
+    <Compile Include="iniKeyAttribute.cs" />
+    <Compile Include="IniSectionAttribute.cs" />
+    <Compile Include="Logic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
