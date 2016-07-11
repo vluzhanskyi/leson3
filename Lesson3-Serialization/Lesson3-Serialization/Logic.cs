@@ -22,8 +22,7 @@ namespace Lesson3_Serialization
             {
                     serialDictionary.Add(var.GetCustomAttributes(true), var.GetValue(ini1));
             }
-
-            
+                       
 
 
             //foreach (var property in props)
