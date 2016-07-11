@@ -15,12 +15,31 @@ namespace Lesson3_Serialization
             //LinkedList<Data> linkedData = new LinkedList<Data>();
             //ln = new LinkedListNode<Data>(null);
             PropertyInfo[] props = ini1.GetType().GetProperties();
-
+        
             var serialDictionary = new Dictionary<object[], object>();
 
             foreach (PropertyInfo var in props)
             {
-                    serialDictionary.Add(var.GetCustomAttributes(true), var.GetValue(ini1));
+                string[] attributes = new string[2];
+
+                foreach (var attribute in var.GetCustomAttributes(true))
+                {
+                    IniKeyAttribute keyAttr = null;
+                    IniSectionAttribute sectionAttr = null;
+
+                    if (attribute.GetType() == typeof(IniKeyAttribute))
+                    {
+                        keyAttr = attribute as IniKeyAttribute;
+                        attributes[0] = keyAttr.Element;
+                    }
+                    else if (attribute.GetType() == typeof(IniKeyAttribute))
+                    {
+                        sectionAttr = attribute as IniSectionAttribute;
+                        attributes[1] = keyAttr.Element;
+                    }                    
+                }
+
+                serialDictionary.Add(attributes, var.GetValue(ini1));
             }
                        
 
