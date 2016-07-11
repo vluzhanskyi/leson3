@@ -8,10 +8,14 @@ namespace Lesson3_Serialization
         static void Main()
         {           
             MyIni ini1 = new MyIni(name: "Slava", organization: "Cisco", server: "1.1.1.1", port: 5060, file: "RTP");
-            LinkedListNode<Data> ln;          
+
+           // LinkedListNode<Data> ln;          
             Logic l = new Logic();
-            LinkedList<Data> linkedData = l.CollectData(ini1, out ln);
-            l.Print(linkedData, ln);
+            Dictionary<object[], object> inputDictionary = l.CollectData(ini1);
+           // LinkedList<Data> linkedData = l.CollectData(ini1, out ln);
+          //  l.PrintToIni(linkedData, ln);
+            l.PrintToIni(inputDictionary, "out.ini");
+          //  LinkedList<Data> ReceivedData = l.GetDataFromIni();
         }
     }
     
