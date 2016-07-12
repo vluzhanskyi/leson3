@@ -19,10 +19,28 @@ namespace Lesson3_Serialization
 
             foreach (PropertyInfo var in props)
             {
-                    serialDictionary.Add(var.GetCustomAttributes(false), var.GetValue(ini1));
-                
+                string[] attributes = new string[2];
+
+                foreach (var attribute in var.GetCustomAttributes(true))
+                {
+                    IniKeyAttribute keyAttr = null;
+                    IniSectionAttribute sectionAttr = null;
+
+                    if (attribute.GetType() == typeof(IniKeyAttribute))
+                    {
+                        keyAttr = attribute as IniKeyAttribute;
+                        attributes[0] = keyAttr.Element;
+                    }
+                    else if (attribute.GetType() == typeof(IniKeyAttribute))
+                    {
+                        sectionAttr = attribute as IniSectionAttribute;
+                        attributes[1] = keyAttr.Element;
+                    }                    
+                   
             }
 
+                serialDictionary.Add(attributes, var.GetValue(ini1));
+            }
             
 
 
@@ -68,7 +86,7 @@ namespace Lesson3_Serialization
                         writer.WriteLine("[{0}]", o as IniSectionAttribute);
                         writer.WriteLine("{0} = {1}", valuePair.Key[1], valuePair.Value);
                     }
-                                    
+                   
                 }
 
                 //foreach (var variable in linkedData)
