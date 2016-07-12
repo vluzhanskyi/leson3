@@ -13,8 +13,8 @@ namespace Lesson3_Serialization
             Logic l = new Logic();
             Dictionary<object[], object> inputDictionary = l.CollectData(ini1);
            // LinkedList<Data> linkedData = l.CollectData(ini1, out ln);
-          //  l.PrintToIni(linkedData, ln);
-            l.PrintToIni(inputDictionary, "out.ini");
+          //  l.SerializeToIni(linkedData, ln);
+            l.SerializeToIni(inputDictionary, "out.ini");
           //  LinkedList<Data> ReceivedData = l.GetDataFromIni();
         }
     }

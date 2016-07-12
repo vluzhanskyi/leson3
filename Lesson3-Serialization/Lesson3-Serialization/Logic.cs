@@ -15,12 +15,12 @@ namespace Lesson3_Serialization
             //LinkedList<Data> linkedData = new LinkedList<Data>();
             //ln = new LinkedListNode<Data>(null);
             PropertyInfo[] props = ini1.GetType().GetProperties();
-
             var serialDictionary = new Dictionary<object[], object>();
 
             foreach (PropertyInfo var in props)
             {
-                    serialDictionary.Add(var.GetCustomAttributes(true), var.GetValue(ini1));
+                    serialDictionary.Add(var.GetCustomAttributes(false), var.GetValue(ini1));
+                
             }
 
             
@@ -57,18 +57,18 @@ namespace Lesson3_Serialization
             return serialDictionary;
         }
 
-        public void PrintToIni(Dictionary<object[], object> inputDaDictionary, string file)
+        public void SerializeToIni(Dictionary<object[], object> inputDictionary, string file)
         {
             using (TextWriter writer = new StreamWriter(file))
             {
-                foreach (var valuePair in inputDaDictionary)
+                foreach (var valuePair in inputDictionary)
                 {
                     foreach (var o in valuePair.Key)
                     {
-                        writer.WriteLine("[{0}]", o);
+                        writer.WriteLine("[{0}]", o as IniSectionAttribute);
+                        writer.WriteLine("{0} = {1}", valuePair.Key[1], valuePair.Value);
                     }
-                   
-                   writer.WriteLine("{0} = {1}", valuePair.Key[1], valuePair.Value);
+                                    
                 }
 
                 //foreach (var variable in linkedData)
