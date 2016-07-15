@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 
 
@@ -10,105 +9,106 @@ namespace Lesson3_Serialization
 {
     public class IniSerialization
     {
-        //public Dictionary<PropertyInfo, object> CollectData(MyIni ini1)
-        //{
-
-        //    //LinkedList<Data> linkedData = new LinkedList<Data>();
-        //    //ln = new LinkedListNode<Data>(null);
-        //    PropertyInfo[] props = ini1.GetType().GetProperties();
-        //    var serialDictionary = new Dictionary<PropertyInfo, object>();
-
-        //    foreach (PropertyInfo var in props)
-        //    {
-        //        List<Attribute> attributes = new List<Attribute>();
-
-        //        foreach (var attribute in var.GetCustomAttributes(true))
-        //        {
-        //            if (attribute.GetType() == typeof(IniKeyAttribute))
-        //            {
-        //                attributes.Add(attribute as IniKeyAttribute);
-        //            }
-        //            else if (attribute.GetType() == typeof(IniSectionAttribute))
-        //            {
-        //                attributes.Add(attribute as IniSectionAttribute);
-        //            }
-        //        }
-
-        //        serialDictionary.Add(var, var.GetValue(ini1));
-        //    }
-
-        //    return serialDictionary;
-        //}
-
-        public void SerializeToIni(MyIni ini1, string file)
+       public Dictionary<object[], object> GetCollectionToSerialize(object iniObject)
         {
-            PropertyInfo[] props = ini1.GetType().GetProperties();
+            var inPutDictionary = new Dictionary<object[], object>();
             
-            using (TextWriter writer = new StreamWriter(file))
+            foreach (var property in iniObject.GetType().GetProperties())
             {
-                string previousSection = null;
-                foreach (var property in props)
+                object[] attributes = new object[2];
+
+                foreach (
+                    var item in
+                        from item in property.CustomAttributes
+                        where item.AttributeType == typeof(IniSectionAttribute)
+                        select item)
                 {
+                    attributes[0] = item.ConstructorArguments[0].Value;
+                    
                     foreach (
-                        var item in
-                            from item in property.CustomAttributes
-                            where item.AttributeType == typeof(IniSectionAttribute)
-                            select item)
+                        var key in
+                            from key in property.CustomAttributes
+                            where key.AttributeType == typeof(IniKeyAttribute)
+                            select key)
                     {
-                        if (previousSection == null || previousSection != (string) item.ConstructorArguments[0].Value)
-                        {
-                            writer.WriteLine();
-                            writer.WriteLine("[{0}]", item.ConstructorArguments[0].Value);
-                        }
-                        previousSection = (string) item.ConstructorArguments[0].Value;
-                        
-                        foreach (
-                            var key in
-                                from key in property.CustomAttributes
-                                where key.AttributeType == typeof(IniKeyAttribute)
-                                select key)
-                        {
-                            writer.WriteLine("{0} = {1}", key.ConstructorArguments[0].Value, property.GetValue(ini1));
-                        }
+                        attributes[1] = key.ConstructorArguments[0].Value;
+                        inPutDictionary.Add(attributes, property.GetValue(iniObject));
                     }
                 }
             }
+            return inPutDictionary;
         }
-
-        public MyIni DeserializeFromIni(string file)
+        public void SerializeToIni(Dictionary<object[], object> inPutDictionary, string file)
         {
-            MyIni Result = new MyIni(name: "", organization: "", server: "", port: 0, file: "");
+            string previousSection = null;
+
+            using (TextWriter writer = new StreamWriter(file))
+            {
+                foreach (var item in inPutDictionary)
+                {
+                    if (previousSection == null || previousSection != (string)item.Key[0])
+                    {
+                        writer.WriteLine();
+                        writer.WriteLine("[{0}]", item.Key[0]);
+                        previousSection = item.Key[0].ToString();
+                    }
+
+                    writer.WriteLine("{0} = {1}", item.Key[1], item.Value);
+                }
+
+            }
+        }
+            
+        public Dictionary<object[], object> DeserializeFromIni(string file)
+        {
+            Dictionary<object[], object> Result = new Dictionary<object[], object>();
+            List<PropertyInfo> props = new List<PropertyInfo>();
 
             using (TextReader reader = new StreamReader(file))
             {
                 string allInputs = reader.ReadToEnd();
-                allInputs = allInputs.Replace("\r\n", " ");
-                string[] sList = allInputs.Split('[');
-                Dictionary<string[], string> dataDictionary = new Dictionary<string[], string>();
-                List<string> keysList = new List<string>();
-                string previousSectionName = null;
+                allInputs = allInputs.Replace("\r\n", "  ");
+                string[] sList = allInputs.Split(new string[] { "  "}, StringSplitOptions.RemoveEmptyEntries);
+                Dictionary<string[], string> dataDictionary = CollectDataFromFile(sList);
 
-                foreach (var line in sList)
+                foreach (var item in dataDictionary)
                 {
-                    string[] attributes = new string[2];
-                    
-                    if (line.Contains("]"))
-                    {
-                        attributes[0] = line.Trim(']');
-                        previousSectionName = line;
-                    }
-
-                    if (line.Contains("="))
-                    {
-                        if (!string.IsNullOrEmpty(attributes[0] = String.Empty))
-                            attributes[0] = previousSectionName;
-                        attributes[1] = line.TrimEnd('=');
-                    }
-
+                    var section = new IniSectionAttribute(item.Key[0]);
+                    var key = new IniKeyAttribute(item.Key[1]);
+                    Result.Add(new object [] { section, key} , item.Value);
                 }
             }
-
+             
             return Result;
+        }
+
+        private Dictionary<string[], string> CollectDataFromFile(string[] inilines)
+        {
+            Dictionary<string[], string> dataDictionary = new Dictionary<string[], string>();
+
+            string previousSectionName = null;
+
+            foreach (var line in inilines)
+            {
+                string[] attributes = new string[2];
+
+                if (line.Contains("]"))
+                {
+                    attributes[0] = new string((from c in line where char.IsWhiteSpace(c) || char.IsLetterOrDigit(c) select c).ToArray());
+                    previousSectionName = attributes[0];
+                }
+
+                if (line.Contains("="))
+                {
+                    if (string.IsNullOrEmpty(attributes[0]))
+                        attributes[0] = previousSectionName;
+                    attributes[1] = line.Substring(0, line.LastIndexOf(" = "));
+                    dataDictionary.Add(attributes, line.Substring(line.LastIndexOf(" = ") + 3));
+                }
+
+            }
+
+            return dataDictionary;
         }
 
     }
