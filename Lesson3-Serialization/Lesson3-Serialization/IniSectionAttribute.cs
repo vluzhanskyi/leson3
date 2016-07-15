@@ -2,7 +2,6 @@
 
 namespace Lesson3_Serialization
 {
-    [AttributeUsage(AttributeTargets.All)]
     public class IniSectionAttribute : Attribute
     {
         public IniSectionAttribute(string elementName)
