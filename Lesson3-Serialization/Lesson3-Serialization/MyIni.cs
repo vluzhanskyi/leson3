@@ -11,8 +11,6 @@
             File = file;
         }
 
-    
-
         [IniSection(elementName: "owner")]
         [IniKey(elementName: "name")]
         public string Name { get; set; }
@@ -33,6 +31,5 @@
         [IniKey(elementName: "file")]
         public string File { get; set; }
 
-       
     }
 }
