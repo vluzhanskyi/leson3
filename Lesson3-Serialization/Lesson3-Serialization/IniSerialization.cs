@@ -10,36 +10,6 @@ namespace Lesson3_Serialization
 {
     public class IniSerialization
     {
-        //public Dictionary<PropertyInfo, object> CollectData(MyIni ini1)
-        //{
-
-        //    //LinkedList<Data> linkedData = new LinkedList<Data>();
-        //    //ln = new LinkedListNode<Data>(null);
-        //    PropertyInfo[] props = ini1.GetType().GetProperties();
-        //    var serialDictionary = new Dictionary<PropertyInfo, object>();
-
-        //    foreach (PropertyInfo var in props)
-        //    {
-        //        List<Attribute> attributes = new List<Attribute>();
-
-        //        foreach (var attribute in var.GetCustomAttributes(true))
-        //        {
-        //            if (attribute.GetType() == typeof(IniKeyAttribute))
-        //            {
-        //                attributes.Add(attribute as IniKeyAttribute);
-        //            }
-        //            else if (attribute.GetType() == typeof(IniSectionAttribute))
-        //            {
-        //                attributes.Add(attribute as IniSectionAttribute);
-        //            }
-        //        }
-
-        //        serialDictionary.Add(var, var.GetValue(ini1));
-        //    }
-
-        //    return serialDictionary;
-        //}
-
         public void SerializeToIni(MyIni ini1, string file)
         {
             PropertyInfo[] props = ini1.GetType().GetProperties();
@@ -58,7 +28,7 @@ namespace Lesson3_Serialization
                         if (previousSection == null || previousSection != (string) item.ConstructorArguments[0].Value)
                         {
                             writer.WriteLine();
-                            writer.WriteLine("[{0}]", item.ConstructorArguments[0].Value);
+                            writer.WriteLine("[{item.ConstructorArguments[0].Value}]");
                         }
                         previousSection = (string) item.ConstructorArguments[0].Value;
                         
@@ -68,7 +38,7 @@ namespace Lesson3_Serialization
                                 where key.AttributeType == typeof(IniKeyAttribute)
                                 select key)
                         {
-                            writer.WriteLine("{0} = {1}", key.ConstructorArguments[0].Value, property.GetValue(ini1));
+                            writer.WriteLine("{key.ConstructorArguments[0].Value} = {property.GetValue(ini1)}");
                         }
                     }
                 }
